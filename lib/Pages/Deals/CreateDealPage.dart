@@ -150,16 +150,16 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         if (filtered.isNotEmpty)
           Wrap(
-            spacing: 6.w,
-            runSpacing: 6.h,
+            spacing: 1.w,
+            runSpacing: 0.h,
             children: filtered.map((e) {
               return InputChip(
                 label: Text(
                   e,
-                  style: const TextStyle(color: Colors.white),
+                  style:  TextStyle(color: Colors.white,fontSize: 12.sp),
                 ),
                 onPressed: () {
                   controller.text = e;
@@ -167,7 +167,7 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
                     filtered.clear(); // hide suggestions after selection
                   });
                 },
-                backgroundColor: AppTheme.primary, // your custom color
+                backgroundColor: AppTheme.primary.withOpacity(0.9), // your custom color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.r), // rounded chip
                 ),

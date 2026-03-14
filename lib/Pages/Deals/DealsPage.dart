@@ -77,15 +77,18 @@ class _DealsPageState extends State<DealsPage> with DealsPageHandler {
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     leading: CircleAvatar(
+                      maxRadius: 15,
                       backgroundColor: deal.paymentDone ? Colors.green : Colors.red,
                       child: Icon(deal.paymentDone ? Icons.check : Icons.close, color: Colors.white),
                     ),
                     title: Text(
-                      "${deal.customer} - ${deal.supplier}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      "${deal.customer}",
+                      style:  TextStyle(fontWeight: FontWeight.bold,fontSize: 14.sp),
                     ),
                     subtitle: Text(
-                      "${deal.product} | ${deal.brand} | Qty:${deal.qty} | ₹${deal.customerRate} | ${DateFormat('dd/MM/yyyy').format(deal.date)}",
+                      "${deal.product} | ${deal.brand} | ₹${(deal.customerRate * deal.qty).toStringAsFixed(2)}",
+                      style:  TextStyle(fontSize: 12.5.sp),
+
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.print, color: AppTheme.primary),

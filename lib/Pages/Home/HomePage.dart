@@ -7,59 +7,30 @@ import 'HomePageHandler.dart';
 class HomePage extends StatefulWidget {
   static const routeName = "HomePage";
 
-
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
-
 }
 
-class _HomePageState extends State<HomePage> with HomePageHandler{
-
+class _HomePageState extends State<HomePage> with HomePageHandler {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppTheme.background,
-      // floatingActionButton: FloatingActionButton.extended(
-      //
-      //   backgroundColor: AppTheme.primary,
-      //
-      //   onPressed: openNewDeal,
-      //
-      //   icon: const Icon(Icons.add),
-      //
-      //   label: const Text("New Deal"),
-      //
-      // ),
-
       body: SafeArea(
-
         child: SingleChildScrollView(
-
           padding: EdgeInsets.all(18.w),
-
           child: Column(
-
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
-
               buildHeader(),
-
               SizedBox(height: 24.h),
-
               buildSummaryCards(),
-
               SizedBox(height: 26.h),
-
               buildQuickActions(),
-
               SizedBox(height: 26.h),
-
               buildRecentDeals(),
-
             ],
           ),
         ),
@@ -68,21 +39,13 @@ class _HomePageState extends State<HomePage> with HomePageHandler{
   }
 
   /// HEADER
-
-  Widget buildHeader(){
-
+  Widget buildHeader() {
     return Row(
-
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
       children: [
-
         Column(
-
           crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
-
             Text(
               greetingMessage(),
               style: TextStyle(
@@ -90,9 +53,7 @@ class _HomePageState extends State<HomePage> with HomePageHandler{
                 color: AppTheme.textLight,
               ),
             ),
-
             SizedBox(height: 4.h),
-
             Text(
               "Bill Book",
               style: TextStyle(
@@ -103,69 +64,50 @@ class _HomePageState extends State<HomePage> with HomePageHandler{
             ),
           ],
         ),
-
         Container(
-
           padding: EdgeInsets.all(10.w),
-
           decoration: BoxDecoration(
-
             color: AppTheme.card,
-
             borderRadius: BorderRadius.circular(14.r),
-
             boxShadow: AppTheme.cardShadow,
-
           ),
-
           child: Icon(
             Icons.notifications_none,
             color: AppTheme.primary,
           ),
         )
-
       ],
     );
   }
 
   /// SUMMARY
-
-  Widget buildSummaryCards(){
-
+  Widget buildSummaryCards() {
     return Row(
-
       children: [
-
         Expanded(
-            child: summaryCard(
-                "Today's Deals",
-                todayDeals.toString(),
-                Icons.receipt)
+          child: summaryCard(
+            "Today's Deals",
+            todayDeals.toString(),
+            Icons.receipt,
+          ),
         ),
-
         SizedBox(width: 12.w),
-
         Expanded(
-            child: summaryCard(
-                "Pending",
-                pendingAmount,
-                Icons.warning_amber)
+          child: summaryCard(
+            "Pending",
+            pendingAmount,
+            Icons.warning_amber,
+          ),
         ),
-
       ],
     );
   }
 
   /// QUICK ACTIONS
-
   Widget buildQuickActions() {
-
     return Column(
-
       crossAxisAlignment: CrossAxisAlignment.start,
-
       children: [
-
         Text(
           "Quick Actions",
           style: TextStyle(
@@ -174,75 +116,29 @@ class _HomePageState extends State<HomePage> with HomePageHandler{
             color: AppTheme.textDark,
           ),
         ),
-
         SizedBox(height: 14.h),
-
         Row(
-
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
           children: [
-
-            actionButton(Icons.add,"New Deal", (){
-
+            actionButton(Icons.add, "New Deal", () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => const CreateDealPage(),
                 ),
-              );
-
+              ).then((_) => loadHomeData());
             }),
-
-            actionButton(Icons.people,"Customers", (){
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const CreateDealPage(),
-                ),
-              );
-
-            }),
-
-            actionButton(Icons.store,"Suppliers", (){
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const CreateDealPage(),
-                ),
-              );
-
-            }),
-
-            actionButton(Icons.inventory,"Products", (){
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const CreateDealPage(),
-                ),
-              );
-
-            }),
-
           ],
         )
-
       ],
     );
   }
+
   /// RECENT DEALS
-
-  Widget buildRecentDeals(){
-
+  Widget buildRecentDeals() {
     return Column(
-
       crossAxisAlignment: CrossAxisAlignment.start,
-
       children: [
-
         Text(
           "Recent Deals",
           style: TextStyle(
@@ -251,13 +147,9 @@ class _HomePageState extends State<HomePage> with HomePageHandler{
             color: AppTheme.textDark,
           ),
         ),
-
         SizedBox(height: 14.h),
-
-        ...recentDeals.map((deal) => dealCard(deal)).toList()
-
+        ...recentDeals.map((deal) => dealCard(deal)).toList(),
       ],
     );
   }
-
 }
