@@ -2,6 +2,7 @@ import 'package:billbook/Constant/app_theme.dart';
 import 'package:billbook/Pages/Deals/DealsPage.dart';
 import 'package:billbook/Pages/Home/HomePage.dart';
 import 'package:billbook/Pages/More/MorePage.dart';
+import 'package:billbook/Pages/Reports/ReportPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -20,7 +21,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List pages = [
     const HomePage(),
     const DealsPage(),
-    const HomePage(),
+    const ReportPage(),
     const MorePage(),
   ];
 

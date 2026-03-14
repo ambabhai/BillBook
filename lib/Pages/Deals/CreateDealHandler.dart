@@ -275,6 +275,8 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
       return;
     }
 
+    saveDeal();
+
     final pdf = pw.Document();
 
     pdf.addPage(
