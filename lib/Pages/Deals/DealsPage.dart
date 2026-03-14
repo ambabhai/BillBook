@@ -37,14 +37,6 @@ class _DealsPageState extends State<DealsPage> with DealsPageHandler {
           return buildDealCard(deal, index);
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const CreateDealPage()),
-        ).then((_) => loadDeals()),
-        backgroundColor: AppTheme.primary,
-        child: const Icon(Icons.add),
-      ),
     );
   }
 

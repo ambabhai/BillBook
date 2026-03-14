@@ -28,7 +28,7 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
   bool paymentDone = false;
   double profit = 0;
 
-  // Live filter lists for autosuggestion
+  // Live filter lists for autocomplete
   List<String> filteredCustomers = [];
   List<String> filteredSuppliers = [];
 
@@ -40,24 +40,16 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
 
   /// Load previously saved products, brands, customers, suppliers from Hive
   Future<void> loadSavedData() async {
-    var box = await Hive.openBox<DealModel>('dealsBox');
-    List<String> tempCustomers = [];
-    List<String> tempSuppliers = [];
-    List<String> tempProducts = [];
-    List<String> tempBrands = [];
-
-    for (var deal in box.values) {
-      if (!tempCustomers.contains(deal.customer)) tempCustomers.add(deal.customer);
-      if (!tempSuppliers.contains(deal.supplier)) tempSuppliers.add(deal.supplier);
-      if (!tempProducts.contains(deal.product)) tempProducts.add(deal.product);
-      if (!tempBrands.contains(deal.brand)) tempBrands.add(deal.brand);
-    }
+    var productBox = await Hive.openBox<String>('productsBox');
+    var brandBox = await Hive.openBox<String>('brandsBox');
+    var customerBox = await Hive.openBox<String>('customersBox');
+    var supplierBox = await Hive.openBox<String>('suppliersBox');
 
     setState(() {
-      customers = tempCustomers;
-      suppliers = tempSuppliers;
-      products = tempProducts;
-      brands = tempBrands;
+      products = productBox.values.toList();
+      brands = brandBox.values.toList();
+      customers = customerBox.values.toList();
+      suppliers = supplierBox.values.toList();
       filteredCustomers = List.from(customers);
       filteredSuppliers = List.from(suppliers);
     });
@@ -73,63 +65,24 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
     });
   }
 
-  // Live filter
+  // Live filter for autocomplete
   void filterCustomer(String input){
     setState(() {
-      filteredCustomers = customers.where((c) => c.toLowerCase().contains(input.toLowerCase())).toList();
+      filteredCustomers = customers
+          .where((c) => c.toLowerCase().contains(input.toLowerCase()))
+          .toList();
     });
   }
 
   void filterSupplier(String input){
     setState(() {
-      filteredSuppliers = suppliers.where((s) => s.toLowerCase().contains(input.toLowerCase())).toList();
+      filteredSuppliers = suppliers
+          .where((s) => s.toLowerCase().contains(input.toLowerCase()))
+          .toList();
     });
   }
 
-  /// Save deal
-  // Future<void> saveDeal() async {
-  //   if(customerController.text.isEmpty || supplierController.text.isEmpty ||
-  //       selectedProduct == null || selectedBrand == null) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text("Please fill all required fields")));
-  //     return;
-  //   }
-  //
-  //   final deal = DealModel(
-  //     customer: customerController.text.trim(),
-  //     supplier: supplierController.text.trim(),
-  //     product: selectedProduct!,
-  //     brand: selectedBrand!,
-  //     qty: double.tryParse(qtyController.text) ?? 0,
-  //     customerRate: double.tryParse(customerRateController.text) ?? 0,
-  //     supplierRate: double.tryParse(supplierRateController.text) ?? 0,
-  //     paymentDone: paymentDone,
-  //     note: noteController.text.trim(),
-  //     date: selectedDate,
-  //     profit: profit,
-  //   );
-  //
-  //   var box = await Hive.openBox<DealModel>('dealsBox');
-  //   await box.add(deal);
-  //
-  //   // Reset fields
-  //   customerController.clear();
-  //   supplierController.clear();
-  //   qtyController.clear();
-  //   customerRateController.clear();
-  //   supplierRateController.clear();
-  //   noteController.clear();
-  //   selectedProduct = null;
-  //   selectedBrand = null;
-  //   paymentDone = false;
-  //   profit = 0;
-  //   selectedDate = DateTime.now();
-  //
-  //   setState(() {});
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Deal saved successfully")));
-  // }
-
+  /// Save deal to Hive
   Future<void> saveDeal() async {
     String customer = customerController.text.trim();
     String supplier = supplierController.text.trim();
@@ -147,32 +100,32 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
       return;
     }
 
-    // Save unique strings in separate boxes
+    // Save strings to separate boxes
     var productBox = await Hive.openBox<String>('productsBox');
     var brandBox = await Hive.openBox<String>('brandsBox');
     var customerBox = await Hive.openBox<String>('customersBox');
     var supplierBox = await Hive.openBox<String>('suppliersBox');
 
-    if(!products.contains(product)){
+    if(!products.contains(product)) {
       products.add(product);
-      productBox.put(product, product);
+      await productBox.put(product, product);
     }
-    if(!brands.contains(brand)){
+    if(!brands.contains(brand)) {
       brands.add(brand);
-      brandBox.put(brand, brand);
+      await brandBox.put(brand, brand);
     }
-    if(!customers.contains(customer)){
+    if(!customers.contains(customer)) {
       customers.add(customer);
-      customerBox.put(customer, customer);
+      await customerBox.put(customer, customer);
     }
-    if(!suppliers.contains(supplier)){
+    if(!suppliers.contains(supplier)) {
       suppliers.add(supplier);
-      supplierBox.put(supplier, supplier);
+      await supplierBox.put(supplier, supplier);
     }
 
-    // Save DealModel in separate box
+    // Save deal
     var dealsBox = await Hive.openBox<DealModel>('dealsBox');
-    dealsBox.add(DealModel(
+    await dealsBox.add(DealModel(
       customer: customer,
       supplier: supplier,
       product: product,
@@ -182,7 +135,8 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
       supplierRate: suppRate,
       paymentDone: paymentDone,
       note: note,
-      date: selectedDate, profit:profit,
+      date: selectedDate,
+      profit: profit,
     ));
 
     // Reset fields
@@ -211,18 +165,22 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Add New Product"),
-        content: TextField(controller: newController, decoration: const InputDecoration(hintText: "Enter product name")),
+        content: TextField(
+          controller: newController,
+          decoration: const InputDecoration(hintText: "Enter product name"),
+        ),
         actions: [
           TextButton(onPressed: ()=>Navigator.pop(ctx), child: const Text("Cancel")),
-          TextButton(onPressed: (){
+          TextButton(onPressed: () async {
             String value = newController.text.trim();
             if(value.isNotEmpty && !products.contains(value)){
               products.add(value);
-              Hive.box<DealModel>('dealsBox').put('products', products as DealModel);
               selectedProduct = value;
+              var productBox = await Hive.openBox<String>('productsBox');
+              await productBox.put(value, value); // Save in Hive
             }
             Navigator.pop(ctx);
-            setState((){});
+            setState((){}); // Single tap add
           }, child: const Text("Add")),
         ],
       ),
@@ -236,18 +194,22 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Add New Brand"),
-        content: TextField(controller: newController, decoration: const InputDecoration(hintText: "Enter brand name")),
+        content: TextField(
+          controller: newController,
+          decoration: const InputDecoration(hintText: "Enter brand name"),
+        ),
         actions: [
           TextButton(onPressed: ()=>Navigator.pop(ctx), child: const Text("Cancel")),
-          TextButton(onPressed: (){
+          TextButton(onPressed: () async {
             String value = newController.text.trim();
             if(value.isNotEmpty && !brands.contains(value)){
               brands.add(value);
-              Hive.box<DealModel>('dealsBox').put('brands', brands as DealModel);
               selectedBrand = value;
+              var brandBox = await Hive.openBox<String>('brandsBox');
+              await brandBox.put(value, value); // Save in Hive
             }
             Navigator.pop(ctx);
-            setState((){});
+            setState((){}); // Single tap add
           }, child: const Text("Add")),
         ],
       ),
@@ -264,9 +226,9 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
             content: Text("Do you want to remove '$name'?"),
             actions: [
               TextButton(onPressed: ()=>Navigator.pop(ctx), child: const Text("Cancel")),
-              TextButton(onPressed: (){
-                if(type=='product') removeProduct(name);
-                else if(type=='brand') removeBrand(name);
+              TextButton(onPressed: () async {
+                if(type=='product') await removeProduct(name);
+                else if(type=='brand') await removeBrand(name);
                 Navigator.pop(ctx);
               }, child: const Text("Remove", style: TextStyle(color: Colors.red))),
             ],
@@ -275,17 +237,19 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
     );
   }
 
-  void removeProduct(String name){
+  Future<void> removeProduct(String name) async {
     products.remove(name);
     if(selectedProduct==name) selectedProduct=null;
-    Hive.box<DealModel>('dealsBox').put('products', products as DealModel);
+    var productBox = await Hive.openBox<String>('productsBox');
+    await productBox.delete(name);
     setState((){});
   }
 
-  void removeBrand(String name){
+  Future<void> removeBrand(String name) async {
     brands.remove(name);
     if(selectedBrand==name) selectedBrand=null;
-    Hive.box<DealModel>('dealsBox').put('brands', brands as DealModel);
+    var brandBox = await Hive.openBox<String>('brandsBox');
+    await brandBox.delete(name);
     setState((){});
   }
 
@@ -302,7 +266,7 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
     }
   }
 
-
+  /// Share deal as PDF
   Future<void> shareDealPDF() async {
     if(selectedProduct == null || selectedBrand == null || customerController.text.isEmpty ){
       ScaffoldMessenger.of(context).showSnackBar(
@@ -322,7 +286,9 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text("BILL", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.Center(
+                  child: pw.Text("BILL", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                ),
                 pw.SizedBox(height: 12),
                 pw.Text("Customer: ${customerController.text}"),
                 pw.Text("Supplier: ${supplierController.text}"),
@@ -365,8 +331,10 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
       ),
     );
 
-    // Share PDF
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'deal_${DateTime.now().millisecondsSinceEpoch}.pdf');
+    // Share PDF directly
+    await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: 'deal_${DateTime.now().millisecondsSinceEpoch}.pdf'
+    );
   }
-
 }
