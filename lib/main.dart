@@ -9,6 +9,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import 'Model/deal_model.dart';
+import 'Pages/Password/PasswordPage.dart';
 
 
 void main() async {
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
           themeMode: ThemeMode.dark,
           debugShowCheckedModeBanner: false,
           routes: routes,
-          home: BottomNavBar(),
+          home: PasswordPage(),
         );
       },
     );

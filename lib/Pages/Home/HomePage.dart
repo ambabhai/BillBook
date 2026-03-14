@@ -1,5 +1,6 @@
 import 'package:billbook/Pages/Deals/CreateDealPage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../Constant/app_theme.dart';
 import 'HomePageHandler.dart';
@@ -16,27 +17,34 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with HomePageHandler {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(18.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildHeader(),
-              SizedBox(height: 24.h),
-              buildSummaryCards(),
-              SizedBox(height: 26.h),
-              buildQuickActions(),
-              SizedBox(height: 26.h),
-              buildRecentDeals(),
-            ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, // transparent status bar
+        statusBarIconBrightness: Brightness.dark, // dark icons on Android
+        statusBarBrightness: Brightness.light, // dark icons on iOS
+    ),
+      child:       Scaffold(
+        backgroundColor: AppTheme.background,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(18.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildHeader(),
+                SizedBox(height: 24.h),
+                buildSummaryCards(),
+                SizedBox(height: 26.h),
+                buildQuickActions(),
+                SizedBox(height: 26.h),
+                buildRecentDeals(),
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
+    }
 
   /// HEADER
   Widget buildHeader() {
