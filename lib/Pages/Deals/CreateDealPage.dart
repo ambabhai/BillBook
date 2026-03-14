@@ -127,7 +127,13 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
     );
   }
 
-  Widget buildAutoCompleteField(String label, TextEditingController controller, List<String> list, Function(String) onChange, List<String> filtered){
+  Widget buildAutoCompleteField(
+      String label,
+      TextEditingController controller,
+      List<String> list,
+      Function(String) onChange,
+      List<String> filtered,
+      ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -144,18 +150,31 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
             ),
           ),
         ),
-        ...filtered.map((e) => GestureDetector(
-          onTap: (){
-            controller.text = e;
-            setState((){});
-          },
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 8.h,horizontal: 12.w),
-            color: Colors.grey.shade200,
-            child: Text(e),
+        const SizedBox(height: 8),
+        if (filtered.isNotEmpty)
+          Wrap(
+            spacing: 6.w,
+            runSpacing: 6.h,
+            children: filtered.map((e) {
+              return InputChip(
+                label: Text(
+                  e,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                onPressed: () {
+                  controller.text = e;
+                  setState(() {
+                    filtered.clear(); // hide suggestions after selection
+                  });
+                },
+                backgroundColor: AppTheme.primary, // your custom color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.r), // rounded chip
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+              );
+            }).toList(),
           ),
-        ))
       ],
     );
   }
