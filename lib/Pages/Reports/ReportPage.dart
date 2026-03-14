@@ -5,15 +5,15 @@ import 'package:intl/intl.dart';
 
 import 'ReportPageHandler.dart';
 
-class ReportPage extends StatefulWidget {
-  const ReportPage({super.key});
-  static const routeName = "ReportPage";
+class ReportsPage extends StatefulWidget {
+  const ReportsPage({super.key});
+  static const routeName = "ReportsPage";
 
   @override
-  State<ReportPage> createState() => _ReportPageState();
+  State<ReportsPage> createState() => _ReportsPageState();
 }
 
-class _ReportPageState extends State<ReportPage> with ReportHandler {
+class _ReportsPageState extends State<ReportsPage> with ReportHandler {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,113 +21,75 @@ class _ReportPageState extends State<ReportPage> with ReportHandler {
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
         title: const Text("Reports", style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(12.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildFilters(),
-            SizedBox(height: 12.h),
-            Expanded(child: buildDealsTable()),
+            buildMetricCard("Total Deals", allDeals.length.toString()),
+            SizedBox(height: 5.h),
+            buildMetricCard("Today's Deals", todaysDeals().length.toString()),
+            SizedBox(height: 5.h),
+            buildMetricCard("Total Revenue", "₹${calculateTotalRevenue().toStringAsFixed(2)}"),
+            SizedBox(height: 5.h),
+            buildMetricCard("Total Profit", "₹${calculateTotalProfit().toStringAsFixed(2)}"),
+            SizedBox(height: 5.h),
+            buildMetricCard("Paid Deals", "${paidDealsCount()}"),
+            SizedBox(height: 5.h),
+            buildMetricCard("Pending Deals", "${pendingDealsCount()}"),
+            SizedBox(height: 5.h),
+            Row(
+              children: [
+                Expanded(child:             buildProfitSummaryCard(),
+                )
+              ],
+            ),
+            SizedBox(height: 5.h),
           ],
         ),
       ),
     );
   }
 
-  Widget buildFilters() {
-    return Wrap(
-      spacing: 8.w,
-      runSpacing: 8.h,
-      children: [
-        DropdownButton<String>(
-          hint: const Text("Customer"),
-          value: selectedCustomer,
-          items: [null, ...customers].map((c) {
-            return DropdownMenuItem<String>(
-              value: c,
-              child: Text(c ?? "All"),
-            );
-          }).toList(),
-          onChanged: (v) {
-            setState(() => selectedCustomer = v);
-            applyFilters();
-          },
+  Widget buildMetricCard(String title, String value) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+      elevation: 1,
+      child: Padding(
+        padding: EdgeInsets.all(16.w),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(value, style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp,color: Colors.green[700])),
+          ],
         ),
-        DropdownButton<String>(
-          hint: const Text("Product"),
-          value: selectedProduct,
-          items: [null, ...products].map((p) {
-            return DropdownMenuItem<String>(
-              value: p,
-              child: Text(p ?? "All"),
-            );
-          }).toList(),
-          onChanged: (v) {
-            setState(() => selectedProduct = v);
-            applyFilters();
-          },
-        ),
-        DropdownButton<String>(
-          hint: const Text("Brand"),
-          value: selectedBrand,
-          items: [null, ...brands].map((b) {
-            return DropdownMenuItem<String>(
-              value: b,
-              child: Text(b ?? "All"),
-            );
-          }).toList(),
-          onChanged: (v) {
-            setState(() => selectedBrand = v);
-            applyFilters();
-          },
-        ),
-        ElevatedButton(
-            onPressed: () => pickFromDate(context),
-            child: Text(fromDate == null ? "From Date" : DateFormat('dd/MM/yyyy').format(fromDate!))),
-        ElevatedButton(
-            onPressed: () => pickToDate(context),
-            child: Text(toDate == null ? "To Date" : DateFormat('dd/MM/yyyy').format(toDate!))),
-        IconButton(
-          onPressed: clearFilters,
-          icon: const Icon(Icons.clear, color: Colors.red),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget buildDealsTable() {
-    if (filteredDeals.isEmpty) {
-      return const Center(child: Text("No deals found."));
-    }
+  Widget buildProfitSummaryCard() {
+    double weekly = calculateProfitSummary(period: 'week');
+    double monthly = calculateProfitSummary(period: 'month');
+    double yearly = calculateProfitSummary(period: 'year');
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        headingRowColor: MaterialStateColor.resolveWith((states) => AppTheme.primary.withOpacity(0.2)),
-        columns: const [
-          DataColumn(label: Text("Customer")),
-          DataColumn(label: Text("Product")),
-          DataColumn(label: Text("Brand")),
-          DataColumn(label: Text("Qty")),
-          DataColumn(label: Text("Rate")),
-          DataColumn(label: Text("Payment Done")),
-        ],
-        rows: filteredDeals.map((deal) {
-          return DataRow(
-            cells: [
-              DataCell(Text(deal.customer)),
-              DataCell(Text(deal.product)),
-              DataCell(Text(deal.brand)),
-              DataCell(Text(deal.qty.toString())),
-              DataCell(Text(deal.customerRate.toStringAsFixed(2))),
-              DataCell(Text(deal.paymentDone ? "Yes" : "No")),
-            ],
-          );
-        }).toList(),
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+      elevation: 1,
+      child: Padding(
+        padding: EdgeInsets.all(16.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Profit Summary", style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 8.h),
+            Text("Weekly: ₹${weekly.toStringAsFixed(2)}"),
+            Text("Monthly: ₹${monthly.toStringAsFixed(2)}"),
+            Text("Yearly: ₹${yearly.toStringAsFixed(2)}"),
+          ],
+        ),
       ),
     );
   }

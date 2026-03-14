@@ -21,8 +21,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List pages = [
     const HomePage(),
     const DealsPage(),
-    const ReportPage(),
-    const MorePage(),
+    const ReportsPage(),
+    // const MorePage(),
   ];
 
   @override
@@ -79,7 +79,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           navItem(Icons.home_rounded,"Home",0),
           navItem(Icons.receipt_long_rounded,"Deals",1),
           navItem(Icons.bar_chart_rounded,"Reports",2),
-          navItem(Icons.menu_rounded,"Menu",3),
+          // navItem(Icons.menu_rounded,"Menu",3),
 
         ],
       ),
