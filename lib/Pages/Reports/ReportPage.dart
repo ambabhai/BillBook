@@ -45,6 +45,29 @@ class _ReportsPageState extends State<ReportsPage> with ReportHandler {
               ],
             ),
             SizedBox(height: 5.h),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                Expanded(
+                  child:ElevatedButton(
+                    onPressed: generateFullReport,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    child: const Text(
+                      "Print Full Report",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
+            SizedBox(height: 10.h),
           ],
         ),
       ),
@@ -76,6 +99,7 @@ class _ReportsPageState extends State<ReportsPage> with ReportHandler {
     double yearly = calculateProfitSummary(period: 'year');
 
     return Card(
+      color:AppTheme.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       elevation: 1,
       child: Padding(
@@ -92,5 +116,7 @@ class _ReportsPageState extends State<ReportsPage> with ReportHandler {
         ),
       ),
     );
+
+
   }
 }

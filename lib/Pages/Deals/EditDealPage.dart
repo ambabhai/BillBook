@@ -56,6 +56,7 @@ class _EditDealPageState extends State<EditDealPage> with CreateDealHandler {
       return;
     }
 
+    // Validate all items
     for (int i = 0; i < itemForms.length; i++) {
       final item = itemForms[i];
       if (item.selectedProduct == null ||
@@ -70,20 +71,19 @@ class _EditDealPageState extends State<EditDealPage> with CreateDealHandler {
       }
     }
 
+    // Open Hive box
     var dealsBox = await Hive.openBox<DealModel>('dealsBox');
 
-    List<DealItemModel> updatedItems = [];
-    for (var item in itemForms) {
-      updatedItems.add(
-        DealItemModel(
-          product: item.selectedProduct ?? '',
-          brand: item.selectedBrand ?? '',
-          qty: double.tryParse(item.qtyController.text) ?? 0,
-          customerRate: double.tryParse(item.customerRateController.text) ?? 0,
-          supplierRate: double.tryParse(item.supplierRateController.text) ?? 0,
-        ),
+    // Prepare updated items
+    List<DealItemModel> updatedItems = itemForms.map((item) {
+      return DealItemModel(
+        product: item.selectedProduct ?? '',
+        brand: item.selectedBrand ?? '',
+        qty: double.tryParse(item.qtyController.text) ?? 0,
+        customerRate: double.tryParse(item.customerRateController.text) ?? 0,
+        supplierRate: double.tryParse(item.supplierRateController.text) ?? 0,
       );
-    }
+    }).toList();
 
     // Update the existing deal
     widget.deal.customer = customer;
@@ -93,18 +93,20 @@ class _EditDealPageState extends State<EditDealPage> with CreateDealHandler {
     widget.deal.items = updatedItems;
     widget.deal.paymentDone = itemForms.any((e) => e.paymentDone);
 
+    // Save to Hive
     await widget.deal.save();
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Deal updated successfully")),
     );
 
-    Navigator.pop(context, true); // return to previous page
+    // Return the updated deal so DealsPage can refresh
+    Navigator.pop(context, widget.deal);
   }
 
   @override
   Widget build(BuildContext context) {
-    // We reuse the exact same UI from CreateDealPage
+    // Reuse the exact same UI from CreateDealPage
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(

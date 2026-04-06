@@ -38,6 +38,7 @@ class _DealsPageState extends State<DealsPage> with DealsPageHandler {
               onChanged: (value) => applyFilters(),
               decoration: InputDecoration(
                 hintText: "Search customer, supplier, product...",
+                hintStyle: TextStyle(fontSize: 13.5.sp),
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -116,9 +117,23 @@ class _DealsPageState extends State<DealsPage> with DealsPageHandler {
                 filteredDeals[filteredDeals.length - 1 - index];
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => EditDealPage(deal: deal,),));
+                  onTap: () async {
+                    final updatedDeal = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditDealPage(deal: deal),
+                      ),
+                    );
 
+                    if (updatedDeal != null && updatedDeal is DealModel) {
+                      setState(() {
+                        int index = filteredDeals.indexOf(deal);
+                        if (index != -1) filteredDeals[index] = updatedDeal;
+
+                        int mainIndex = deals.indexOf(deal);
+                        if (mainIndex != -1) deals[mainIndex] = updatedDeal;
+                      });
+                    }
                   },
                   onLongPress: () => deleteDealConfirmation(deal),
                   child: Container(
@@ -221,40 +236,50 @@ class _DealsPageState extends State<DealsPage> with DealsPageHandler {
                           color: AppTheme.primary,
                         ),
                         SizedBox(height: 1.h),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: buildInfoBox(
-                                "Product",
-                                deal.items.isNotEmpty ? deal.items.first.product : " - ",
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                            // Expanded(
-                            //   child: buildInfoBox(
-                            //     "Brand",
-                            //     deal.items.isNotEmpty ? deal.items.first.brand : " - ",),
-                            // ),
 
-
-                            Expanded(
-                              child: buildInfoBox(
-                                "Qty",
-                                deal.items.isNotEmpty ? deal.items.first.qty.toString() : " 0 ",
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: deal.items.map((item) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 6.h),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: buildInfoBox("Product", item.product),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Expanded(
+                                    child: buildInfoBox("Qty", item.qty.toString()),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Expanded(
+                                    child: buildInfoBox(
+                                      "Total",
+                                      "₹${(item.customerRate * item.qty).toStringAsFixed(2)}",
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: buildInfoBox(
-                                "Total",
-                                "₹${deal.totalCustomerAmount.toStringAsFixed(2)}",
-                              ),
-                            ),
-                          ],
+                            );
+                          }).toList(),
                         ),
-                        // SizedBox(height: 8.h),
+
                         // Row(
                         //   children: [
+                        //     Expanded(
+                        //       child: buildInfoBox(
+                        //         "Product",
+                        //         deal.items.isNotEmpty ? deal.items.first.product : " - ",
+                        //       ),
+                        //     ),
+                        //     SizedBox(width: 8.w),
+                        //     // Expanded(
+                        //     //   child: buildInfoBox(
+                        //     //     "Brand",
+                        //     //     deal.items.isNotEmpty ? deal.items.first.brand : " - ",),
+                        //     // ),
+                        //
+                        //
                         //     Expanded(
                         //       child: buildInfoBox(
                         //         "Qty",

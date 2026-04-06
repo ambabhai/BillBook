@@ -1,9 +1,118 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 import '../../Model/deal_model.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 
 mixin ReportHandler<T extends StatefulWidget> on State<T> {
   List<DealModel> allDeals = [];
+
+
+  Future<void> generateFullReport() async {
+    final pdf = pw.Document();
+
+    final now = DateTime.now();
+    final formattedDate = DateFormat('dd MMM yyyy – HH:mm').format(now);
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.all(16),
+        build: (pw.Context context) {
+          double totalProfit = 0;
+
+          // Table data
+          final data = allDeals.expand((deal) {
+            return deal.items.map((item) {
+              final total = item.qty * item.customerRate;
+              final profit = (item.customerRate - item.supplierRate) * item.qty;
+              totalProfit += profit;
+              return [
+                deal.customer,
+                deal.supplier,
+                item.product,
+                item.brand,
+                item.qty.toStringAsFixed(2),
+                item.customerRate.toStringAsFixed(2),
+                item.supplierRate.toStringAsFixed(2),
+                total.toStringAsFixed(2),
+                profit.toStringAsFixed(2),
+                deal.paymentDone ? "Paid" : "Unpaid",
+                deal.orderCompleted ? "Completed" : "Pending",
+                DateFormat('dd MMM yyyy').format(deal.date),
+              ];
+            });
+          }).toList();
+
+          return [
+            // Header
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  "Full Deals Report",
+                  style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.Text("Generated on: $formattedDate", style: pw.TextStyle(fontSize: 12, color: PdfColors.grey)),
+                pw.SizedBox(height: 12),
+              ],
+            ),
+
+            // Table
+            pw.Table.fromTextArray(
+              headers: [
+                "Customer",
+                "Supplier",
+                "Product",
+                "Brand",
+                "Qty",
+                "Customer Rate",
+                "Supplier Rate",
+                "Total",
+                "Profit",
+                "Payment",
+                "Order Status",
+                "Date"
+              ],
+              data: data,
+              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+              headerDecoration: pw.BoxDecoration(color: PdfColors.blue),
+              cellAlignment: pw.Alignment.centerLeft,
+              cellStyle: pw.TextStyle(fontSize: 10),
+              cellPadding: pw.EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+              rowDecoration: pw.BoxDecoration(
+                border: pw.Border(
+                  bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+                ),
+              ),
+              oddRowDecoration: pw.BoxDecoration(color: PdfColors.grey100),
+            ),
+
+            pw.SizedBox(height: 12),
+
+            // Summary
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text("Total Deals: ${allDeals.length}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text("Total Profit: ₹${totalProfit.toStringAsFixed(2)}", style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                ],
+              ),
+            ),
+          ];
+        },
+      ),
+    );
+
+    // Preview & print/save PDF
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
 
   @override
   void initState() {
