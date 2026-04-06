@@ -28,13 +28,14 @@ class DealModelAdapter extends TypeAdapter<DealModel> {
       note: fields[8] as String,
       date: fields[9] as DateTime,
       profit: fields[10] as double,
+      orderCompleted: fields[11] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, DealModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.customer)
       ..writeByte(1)
@@ -56,7 +57,9 @@ class DealModelAdapter extends TypeAdapter<DealModel> {
       ..writeByte(9)
       ..write(obj.date)
       ..writeByte(10)
-      ..write(obj.profit);
+      ..write(obj.profit)
+      ..writeByte(11)
+      ..write(obj.orderCompleted);
   }
 
   @override

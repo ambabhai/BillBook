@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../../Constant/app_theme.dart';
 import 'CreateDealHandler.dart';
-import 'package:intl/intl.dart';
 
 class CreateDealPage extends StatefulWidget {
   const CreateDealPage({super.key});
@@ -12,25 +12,35 @@ class CreateDealPage extends StatefulWidget {
   State<CreateDealPage> createState() => _CreateDealPageState();
 }
 
-class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler {
-
+class _CreateDealPageState extends State<CreateDealPage>
+    with CreateDealHandler {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
-        title: const Text("New Deal", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "New Deal",
+          style: TextStyle(color: Colors.white),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: EdgeInsets.only(left: 18.w,right: 18.w,top: 18.h,bottom: 100.h),
+            padding: EdgeInsets.only(
+              left: 18.w,
+              right: 18.w,
+              top: 18.h,
+              bottom: 120.h,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildDealCard(),
+                buildPartyDetailsCard(),
+                SizedBox(height: 18.h),
+                buildItemsSection(),
               ],
             ),
           ),
@@ -40,90 +50,278 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
     );
   }
 
-  Widget buildDealCard() {
+  Widget buildPartyDetailsCard() {
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: const Color(0xFFEFEFEC),
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(22.r),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.2),
+            color: AppTheme.primary.withOpacity(0.12),
             blurRadius: 18,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Customer autosuggest
-          buildAutoCompleteField("Customer", customerController, customers, filterCustomer, filteredCustomers),
+          Text(
+            "Party Details",
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary,
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          buildAutoCompleteField(
+            "Customer",
+            customerController,
+            customers,
+            filterCustomer,
+            filteredCustomers,
+          ),
           SizedBox(height: 14.h),
-          // Supplier autosuggest
-          buildAutoCompleteField("Supplier", supplierController, suppliers, filterSupplier, filteredSuppliers),
+
+          buildAutoCompleteField(
+            "Supplier",
+            supplierController,
+            suppliers,
+            filterSupplier,
+            filteredSuppliers,
+          ),
           SizedBox(height: 14.h),
-          // Date
+
           GestureDetector(
-            onTap: ()=> pickDate(context),
+            onTap: () => pickDate(context),
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 12.h,horizontal: 14.w),
+              padding: EdgeInsets.symmetric(
+                vertical: 14.h,
+                horizontal: 14.w,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(14.r),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}"),
-                  const Icon(Icons.calendar_today)
+                  Text(
+                    "Date: ${DateFormat('dd/MM/yyyy').format(selectedDate)}",
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                  const Icon(Icons.calendar_today),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 14.h),
-          // Product dropdown
-          buildProductDropdown(),
-          SizedBox(height: 14.h),
-          // Brand dropdown
-          buildBrandDropdown(),
-          SizedBox(height: 14.h),
-          // Qty row
-          buildTextField("Qty", qtyController, keyboard: TextInputType.number, onChanged: (_) => calculateProfit()),
-          SizedBox(height: 14.h),
-          // Customer rate & Supplier rate row
-          Row(
-            children: [
-              Expanded(child: buildTextField("Customer Rate", customerRateController, keyboard: const TextInputType.numberWithOptions(decimal: true), onChanged: (_) => calculateProfit())),
-              SizedBox(width: 8.w),
-              Expanded(child: buildTextField("Supplier Rate", supplierRateController, keyboard: const TextInputType.numberWithOptions(decimal: true), onChanged: (_) => calculateProfit())),
-            ],
+          SizedBox(height: 16.h),
+
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      orderCompleted
+                          ? Icons.check_circle
+                          : Icons.pending_actions,
+                      color: orderCompleted ? Colors.green : Colors.orange,
+                    ),
+                    SizedBox(width: 10.w),
+                    Text(
+                      "Order Completed",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                Switch(
+                  value: orderCompleted,
+                  activeColor: AppTheme.primary,
+                  onChanged: (value) {
+                    setState(() {
+                      orderCompleted = value;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
-          SizedBox(height: 14.h),
-          // Profit card
-          buildProfitCard(),
-          SizedBox(height: 14.h),
-          // Payment toggle
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Payment Done?"),
-              Switch(
-                value: paymentDone,
-                onChanged: (val){
-                  setState(() {
-                    paymentDone = val;
-                  });
-                },
-                activeColor: AppTheme.primary,
-              )
-            ],
-          ),
-          SizedBox(height: 14.h),
-          // Note
-          buildTextField("Note", noteController, lines: 3),
         ],
       ),
+    );
+  }
+
+  Widget buildItemsSection() {
+    return Column(
+      children: List.generate(itemForms.length, (index) {
+        final item = itemForms[index];
+
+        return Container(
+          margin: EdgeInsets.only(bottom: 18.h),
+          padding: EdgeInsets.all(18.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(10.w),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Icon(
+                          Icons.inventory_2_outlined,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Text(
+                        "Item ${index + 1}",
+                        style: TextStyle(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: addNewItemCard,
+                        icon: Container(
+                          padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ),
+                      if (itemForms.length > 1)
+                        IconButton(
+                          onPressed: () => removeItemCard(index),
+                          icon: Container(
+                            padding: EdgeInsets.all(6.w),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.remove,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.h),
+
+              buildProductDropdown(index),
+              SizedBox(height: 14.h),
+
+              buildBrandDropdown(index),
+              SizedBox(height: 14.h),
+
+              buildTextField(
+                "Qty",
+                item.qtyController,
+                keyboard: TextInputType.number,
+                onChanged: (_) => calculateItemProfit(index),
+              ),
+              SizedBox(height: 14.h),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: buildTextField(
+                      "Customer Rate",
+                      item.customerRateController,
+                      keyboard: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => calculateItemProfit(index),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: buildTextField(
+                      "Supplier Rate",
+                      item.supplierRateController,
+                      keyboard: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => calculateItemProfit(index),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
+
+              buildProfitCard(index),
+              SizedBox(height: 14.h),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Payment Done?",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Switch(
+                    value: item.paymentDone,
+                    activeColor: AppTheme.primary,
+                    onChanged: (val) {
+                      setState(() {
+                        item.paymentDone = val;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
+
+              buildTextField(
+                "Note",
+                item.noteController,
+                lines: 3,
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -145,33 +343,35 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(14.r),
               borderSide: BorderSide.none,
             ),
           ),
         ),
-        const SizedBox(height: 5),
+        SizedBox(height: 6.h),
         if (filtered.isNotEmpty)
           Wrap(
-            spacing: 1.w,
-            runSpacing: 0.h,
+            spacing: 6.w,
+            runSpacing: 6.h,
             children: filtered.map((e) {
               return InputChip(
                 label: Text(
                   e,
-                  style:  TextStyle(color: Colors.white,fontSize: 12.sp),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.sp,
+                  ),
                 ),
                 onPressed: () {
                   controller.text = e;
                   setState(() {
-                    filtered.clear(); // hide suggestions after selection
+                    filtered.clear();
                   });
                 },
-                backgroundColor: AppTheme.primary.withOpacity(0.9), // your custom color
+                backgroundColor: AppTheme.primary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r), // rounded chip
+                  borderRadius: BorderRadius.circular(30.r),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
               );
             }).toList(),
           ),
@@ -179,7 +379,13 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
     );
   }
 
-  Widget buildTextField(String hint, TextEditingController controller, {TextInputType? keyboard, int lines = 1, Function(String)? onChanged}){
+  Widget buildTextField(
+      String hint,
+      TextEditingController controller, {
+        TextInputType? keyboard,
+        int lines = 1,
+        Function(String)? onChanged,
+      }) {
     return TextField(
       controller: controller,
       keyboardType: keyboard,
@@ -188,130 +394,65 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: const Color(0xFFF8F8F8),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(14.r),
           borderSide: BorderSide.none,
         ),
       ),
     );
   }
 
-  Widget buildProductDropdown(){
-    return Row(
-      children: [
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: selectedProduct,
-            hint: const Text("Select Product"),
-            items: [
-              ...products.map((p)=> DropdownMenuItem(
-                value: p,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(p),
-                    GestureDetector(
-                      onTap: ()=> confirmRemove('product',p),
-                      child: const Icon(Icons.cancel,color: Colors.red),
-                    )
-                  ],
-                ),
-              )),
-            ],
-            onChanged: (v){
-              setState((){selectedProduct=v;});
-            },
-          ),
-        ),
-        IconButton(onPressed: addProductDialog, icon: const Icon(Icons.add))
-      ],
-    );
-  }
+  Widget buildProfitCard(int index) {
+    final item = itemForms[index];
 
-  Widget buildBrandDropdown(){
-    return Row(
-      children: [
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: selectedBrand,
-            hint: const Text("Select Brand"),
-            items: [
-              ...brands.map((b)=> DropdownMenuItem(
-                value: b,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(b),
-                    GestureDetector(
-                      onTap: ()=> confirmRemove('brand',b),
-                      child: const Icon(Icons.cancel,color: Colors.red),
-                    )
-                  ],
-                ),
-              )),
-            ],
-            onChanged: (v){
-              setState((){selectedBrand=v;});
-            },
-          ),
-        ),
-        IconButton(onPressed: addBrandDialog, icon: const Icon(Icons.add))
-      ],
-    );
-  }
-
-  void confirmRemove(String type,String value){
-    showDialog(
-        context: context,
-        builder: (_){
-          return AlertDialog(
-            title: const Text("Are you sure?"),
-            content: Text("Do you want to remove this $type?"),
-            actions: [
-              TextButton(onPressed: ()=> Navigator.pop(context), child: const Text("Cancel")),
-              TextButton(onPressed: (){
-                Navigator.pop(context);
-                if(type=='product'){
-                  removeProduct(value);
-                }else{
-                  removeBrand(value);
-                }
-              }, child: const Text("Remove")),
-            ],
-          );
-        }
-    );
-  }
-
-  Widget buildProfitCard(){
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: AppTheme.primary.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Column(
         children: [
-          const Text("Estimated Profit"),
+          Text(
+            "Estimated Profit",
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Colors.grey[700],
+            ),
+          ),
           SizedBox(height: 6.h),
-          Text("₹ ${profit.toStringAsFixed(2)}",
-            style: TextStyle(fontSize: 20.sp,fontWeight: FontWeight.bold,color: AppTheme.primary),
+          Text(
+            "₹ ${item.profit.toStringAsFixed(2)}",
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget buildStickyButtons(){
+  Widget buildStickyButtons() {
     return Positioned(
       bottom: 0,
       left: 0,
       right: 0,
       child: Container(
         padding: EdgeInsets.all(14.w),
-        color: AppTheme.background,
+        decoration: BoxDecoration(
+          color: AppTheme.background,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
         child: Row(
           children: [
             Expanded(
@@ -320,19 +461,31 @@ class _CreateDealPageState extends State<CreateDealPage> with CreateDealHandler 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
                 ),
-                child: const Text("Save Deal",style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  "Save Deal",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
             SizedBox(width: 12.w),
             Expanded(
               child: ElevatedButton(
-                onPressed: shareDealPDF,
+                onPressed: showShareOptions,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accent,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
                 ),
-                child: const Text("Share",style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  "Share",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ],

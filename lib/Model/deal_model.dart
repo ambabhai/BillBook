@@ -35,7 +35,10 @@ class DealModel extends HiveObject {
   DateTime date;
 
   @HiveField(10)
-  double profit; // <--- Add this
+  double profit;
+
+  @HiveField(11)
+  bool orderCompleted;
 
   DealModel({
     required this.customer,
@@ -48,6 +51,7 @@ class DealModel extends HiveObject {
     required this.paymentDone,
     required this.note,
     required this.date,
-    required this.profit, // <--- Add this
+    required this.profit,
+    required this.orderCompleted,
   });
 }
