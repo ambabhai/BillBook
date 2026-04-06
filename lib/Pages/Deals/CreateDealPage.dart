@@ -15,6 +15,13 @@ class CreateDealPage extends StatefulWidget {
 
 class _CreateDealPageState extends State<CreateDealPage>
     with CreateDealHandler {
+
+  @override
+  void initState(){
+    super.initState();
+    loadSavedData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
