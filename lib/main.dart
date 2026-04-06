@@ -19,6 +19,8 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(DealModelAdapter());
   Hive.registerAdapter(DealItemModelAdapter());
+  await Hive.openBox<DealModel>('deals');
+
 
 
   SystemChrome.setSystemUIOverlayStyle(
