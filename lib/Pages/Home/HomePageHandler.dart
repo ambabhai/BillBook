@@ -24,30 +24,27 @@ mixin HomePageHandler<T extends StatefulWidget> on State<T> {
     final now = DateTime.now();
 
     setState(() {
-      allDeals = box.values
-          .toList()
-          .reversed
-          .toList(); // latest first
+      allDeals = box.values.toList().reversed.toList();
 
-      // Filter for today's deals
-      recentDeals = allDeals.where((d) =>
-      d.date.day == now.day &&
-          d.date.month == now.month &&
-          d.date.year == now.year
-      ).toList();
+      recentDeals = allDeals.where((d) {
+        return d.date.day == now.day &&
+            d.date.month == now.month &&
+            d.date.year == now.year;
+      }).toList();
 
-      // Today's deals count
       todayDeals = recentDeals.length;
 
-      // Pending Amount
       double pending = 0;
-      for (var d in allDeals) {
-        if (!d.paymentDone) pending += d.customerRate * d.qty;
+
+      for (var deal in allDeals) {
+        if (!deal.paymentDone) {
+          pending += deal.totalCustomerAmount;
+        }
       }
+
       pendingAmount = "₹${pending.toStringAsFixed(2)}";
     });
   }
-
   /// Greeting logic
   String greetingMessage() {
     final hour = DateTime
@@ -123,7 +120,7 @@ mixin HomePageHandler<T extends StatefulWidget> on State<T> {
 
   /// Deal card
   Widget dealCard(DealModel deal) {
-    bool isPaid = deal.paymentDone; // true or false
+    bool isPaid = deal.paymentDone;
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -135,7 +132,6 @@ mixin HomePageHandler<T extends StatefulWidget> on State<T> {
       ),
       child: Row(
         children: [
-          // Paid/Unpaid indicator
           Container(
             width: 12.w,
             height: 12.w,
@@ -152,7 +148,10 @@ mixin HomePageHandler<T extends StatefulWidget> on State<T> {
               color: AppTheme.primary.withOpacity(.12),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(Icons.inventory, color: AppTheme.primary),
+            child: Icon(
+              Icons.inventory,
+              color: AppTheme.primary,
+            ),
           ),
           SizedBox(width: 12.w),
 
@@ -168,26 +167,54 @@ mixin HomePageHandler<T extends StatefulWidget> on State<T> {
                     color: AppTheme.textDark,
                   ),
                 ),
+                SizedBox(height: 4.h),
                 Text(
-                  deal.product,
+                  "${deal.items.length} Items",
                   style: TextStyle(
                     color: AppTheme.textLight,
                     fontSize: 12.sp,
                   ),
                 ),
+                SizedBox(height: 2.h),
+                Text(
+                  deal.items
+                      .map((e) => e.product)
+                      .take(2)
+                      .join(", "),
+                  style: TextStyle(
+                    color: AppTheme.textLight,
+                    fontSize: 11.sp,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
 
-          Text(
-            "₹${deal.customerRate}",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
-            ),
-          )
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "₹${deal.totalCustomerAmount.toStringAsFixed(0)}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                  fontSize: 14.sp,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                isPaid ? "Paid" : "Unpaid",
+                style: TextStyle(
+                  color: isPaid ? Colors.green : Colors.red,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
-  }
-}
+  }}

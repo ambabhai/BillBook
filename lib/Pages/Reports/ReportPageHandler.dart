@@ -28,38 +28,51 @@ mixin ReportHandler<T extends StatefulWidget> on State<T> {
     ).toList();
   }
 
-  // Revenue
   double calculateTotalRevenue() {
     double total = 0;
-    for (var d in allDeals) {
-      total += d.customerRate * d.qty;
+
+    for (var deal in allDeals) {
+      total += deal.totalCustomerAmount;
     }
+
     return total;
   }
 
-  // Profit summary
+// Profit summary
   double calculateTotalProfit() {
     double total = 0;
-    for (var d in allDeals) {
-      total += (d.customerRate - d.supplierRate) * d.qty;
+
+    for (var deal in allDeals) {
+      total += deal.totalProfit;
     }
+
     return total;
   }
 
   double calculateProfitSummary({required String period}) {
     final now = DateTime.now();
     double total = 0;
-    for (var d in allDeals) {
+
+    for (var deal in allDeals) {
       bool include = false;
+
       if (period == 'week') {
-        include = d.date.isAfter(now.subtract(const Duration(days: 7)));
+        include = deal.date.isAfter(
+          now.subtract(const Duration(days: 7)),
+        );
       } else if (period == 'month') {
-        include = d.date.month == now.month && d.date.year == now.year;
+        include =
+            deal.date.month == now.month &&
+                deal.date.year == now.year;
       } else if (period == 'year') {
-        include = d.date.year == now.year;
+        include = deal.date.year == now.year;
       }
-      if (include) total += (d.customerRate - d.supplierRate) * d.qty;
+
+      if (include) {
+        total += deal.totalProfit;
+      }
     }
+
     return total;
   }
 

@@ -30,11 +30,6 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
     DealItemFormModel(),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    loadSavedData();
-  }
 
   void clearFormData() {
     customerController.clear();
@@ -307,6 +302,8 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
       await supplierBox.put(supplier, supplier);
     }
 
+    List<DealItemModel> dealItems = [];
+
     for (var item in itemForms) {
       if (item.selectedProduct != null &&
           !products.contains(item.selectedProduct)) {
@@ -320,10 +317,8 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
         await brandBox.put(item.selectedBrand!, item.selectedBrand!);
       }
 
-      await dealsBox.add(
-        DealModel(
-          customer: customer,
-          supplier: supplier,
+      dealItems.add(
+        DealItemModel(
           product: item.selectedProduct ?? '',
           brand: item.selectedBrand ?? '',
           qty: double.tryParse(item.qtyController.text) ?? 0,
@@ -331,19 +326,31 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
           double.tryParse(item.customerRateController.text) ?? 0,
           supplierRate:
           double.tryParse(item.supplierRateController.text) ?? 0,
-          paymentDone: item.paymentDone,
-          note: item.noteController.text.trim(),
-          date: selectedDate,
-          profit: item.profit,
-          orderCompleted: orderCompleted,
         ),
       );
     }
 
+    await dealsBox.add(
+      DealModel(
+        customer: customer,
+        supplier: supplier,
+        date: selectedDate,
+        paymentDone: itemForms.any((e) => e.paymentDone),
+        orderCompleted: orderCompleted,
+        items: dealItems,
+      ),
+    );
+
+    setState(() {
+      isDealSaved = true;
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Deal saved successfully")),
+      const SnackBar(
+        content: Text("Deal saved successfully"),
+      ),
     );
+
     isDealSaved = true;
   }
 
@@ -1027,13 +1034,15 @@ mixin CreateDealHandler<T extends StatefulWidget> on State<T> {
 
   @override
   void dispose() {
-    customerController.dispose();
-    supplierController.dispose();
+    // First clear or reset anything that uses controllers
     clearFormData();
 
+    // Then dispose controllers
+    customerController.dispose();
+    supplierController.dispose();
 
     for (var item in itemForms) {
-      item.dispose();
+      item.dispose(); // make sure DealItemFormModel has a dispose() that disposes its controllers
     }
 
     super.dispose();

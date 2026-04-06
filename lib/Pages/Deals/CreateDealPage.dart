@@ -5,6 +5,7 @@ import '../../Constant/app_theme.dart';
 import 'CreateDealHandler.dart';
 
 class CreateDealPage extends StatefulWidget {
+
   const CreateDealPage({super.key});
   static const routeName = "CreateDealPage";
 

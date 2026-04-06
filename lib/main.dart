@@ -18,6 +18,8 @@ void main() async {
 
   await Hive.initFlutter();
   Hive.registerAdapter(DealModelAdapter());
+  Hive.registerAdapter(DealItemModelAdapter());
+
 
   SystemChrome.setSystemUIOverlayStyle(
 
