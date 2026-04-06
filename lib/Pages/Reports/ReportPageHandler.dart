@@ -28,15 +28,6 @@ mixin ReportHandler<T extends StatefulWidget> on State<T> {
     ).toList();
   }
 
-  double calculateTotalRevenue() {
-    double total = 0;
-
-    for (var deal in allDeals) {
-      total += deal.totalCustomerAmount;
-    }
-
-    return total;
-  }
 
 // Profit summary
   double calculateTotalProfit() {

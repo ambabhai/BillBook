@@ -126,7 +126,7 @@ class _DealsPageState extends State<DealsPage> with DealsPageHandler {
                     ),
                     padding: EdgeInsets.all(14.w),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppTheme.card,
                       borderRadius: BorderRadius.circular(18.r),
                       boxShadow: [
                         BoxShadow(
@@ -211,7 +211,14 @@ class _DealsPageState extends State<DealsPage> with DealsPageHandler {
                             ),
                           ],
                         ),
-                        SizedBox(height: 14.h),
+                        SizedBox(height: 7.h),
+
+                        Divider(
+                          thickness: 0.45,
+                          // height: 0.002.h,
+                          color: AppTheme.primary,
+                        ),
+                        SizedBox(height: 1.h),
                         Row(
                           children: [
                             Expanded(

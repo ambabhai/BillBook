@@ -32,8 +32,6 @@ class _ReportsPageState extends State<ReportsPage> with ReportHandler {
             SizedBox(height: 5.h),
             buildMetricCard("Today's Deals", todaysDeals().length.toString()),
             SizedBox(height: 5.h),
-            buildMetricCard("Total Revenue", "₹${calculateTotalRevenue().toStringAsFixed(2)}"),
-            SizedBox(height: 5.h),
             buildMetricCard("Total Profit", "₹${calculateTotalProfit().toStringAsFixed(2)}"),
             SizedBox(height: 5.h),
             buildMetricCard("Paid Deals", "${paidDealsCount()}"),
@@ -57,6 +55,8 @@ class _ReportsPageState extends State<ReportsPage> with ReportHandler {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       elevation: 1,
+      color: AppTheme.card,
+      // shadowColor: AppTheme.primary,
       child: Padding(
         padding: EdgeInsets.all(16.w),
         child: Row(
